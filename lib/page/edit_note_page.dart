@@ -2,23 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:Notepad/db/notes_database.dart';
 import 'package:Notepad/model/note.dart';
 import 'package:Notepad/widget/note_form_widget.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AddEditNotePage extends StatefulWidget {
   final Note? note;
+  final GoogleSignInAccount user;
+
 
   const AddEditNotePage({
     Key? key,
     this.note,
+    required this.user,
   }) : super(key: key);
   @override
-  _AddEditNotePageState createState() => _AddEditNotePageState();
+  _AddEditNotePageState createState() => _AddEditNotePageState(user: user);
 }
 
 class _AddEditNotePageState extends State<AddEditNotePage> {
+
+  final GoogleSignInAccount user;
+
+  _AddEditNotePageState({
+    required this.user,
+  });
+
+
   final _formKey = GlobalKey<FormState>();
   late int number;
   late String title;
   late String description;
+  late String userEmail = user.email;
 
   @override
   void initState() {
@@ -85,11 +98,15 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
   }
 
   Future addNote() async {
+
+  print(userEmail);
+
     final note = Note(
       number: number,
       title: title,
       description: description,
       createdTime: DateTime.now(),
+      user: userEmail,
     );
 
     await NotesDatabase.instance.create(note);

@@ -3,20 +3,32 @@ import 'package:intl/intl.dart';
 import 'package:Notepad/db/notes_database.dart';
 import 'package:Notepad/model/note.dart';
 import 'package:Notepad/page/edit_note_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class NoteDetailPage extends StatefulWidget {
+
+  final GoogleSignInAccount user;
+
   final int noteId;
 
   const NoteDetailPage({
     Key? key,
     required this.noteId,
+    required this.user,
   }) : super(key: key);
 
   @override
-  _NoteDetailPageState createState() => _NoteDetailPageState();
+  _NoteDetailPageState createState() => _NoteDetailPageState(user: user);
 }
 
 class _NoteDetailPageState extends State<NoteDetailPage> {
+
+  final GoogleSignInAccount user;
+
+  _NoteDetailPageState({
+    required this.user,
+  });
+
   late Note note;
   bool isLoading = false;
 
@@ -30,7 +42,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
   Future refreshNote() async {
     setState(() => isLoading = true);
 
-    this.note = await NotesDatabase.instance.readNote(widget.noteId);
+    this.note = await NotesDatabase.instance.readNote(widget.noteId, user.email);
 
     setState(() => isLoading = false);
   }
@@ -76,7 +88,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
         if (isLoading) return;
 
         await Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => AddEditNotePage(note: note),
+          builder: (context) => AddEditNotePage(note: note,user: user,),
         ));
 
         refreshNote();

@@ -29,14 +29,14 @@ class NotesDatabase {
     final integerType = 'INTEGER NOT NULL';
 
     await db.execute('''
-CREATE TABLE $tableNotes ( 
-  ${NoteFields.id} $idType, 
-  ${NoteFields.number} $integerType,
-  ${NoteFields.title} $textType,
-  ${NoteFields.description} $textType,
-  ${NoteFields.time} $textType
-  )
-''');
+      CREATE TABLE $tableNotes ( 
+        ${NoteFields.id} $idType, 
+        ${NoteFields.number} $integerType,
+        ${NoteFields.title} $textType,
+        ${NoteFields.description} $textType,
+        ${NoteFields.time} $textType,
+        ${NoteFields.user} $textType)
+      ''');
   }
 
   Future<Note> create(Note note) async {
@@ -46,7 +46,7 @@ CREATE TABLE $tableNotes (
     return note.copy(id: id);
   }
 
-  Future<Note> readNote(int id) async {
+  Future<Note> readNote(int id, String user) async {
     final db = await instance.database;
 
     final maps = await db.query(
@@ -63,14 +63,32 @@ CREATE TABLE $tableNotes (
     }
   }
 
-  Future<List<Note>> readAllNotes() async {
+  Future<List<Note>> readAllNotes(String user) async {
     final db = await instance.database;
+
+    final result = await db.query(
+      tableNotes,
+      where: '${NoteFields.user} = ?',
+      whereArgs: [user],
+    );
+
+    result.forEach((row) => print(row));
+
+    return result.map((json) => Note.fromJson(json)).toList();
+
+
+    /*
+    
+    //final where = '${NoteFields.user} = ?';
 
     final orderBy = '${NoteFields.time} ASC';
 
+    //final result = await db.query(tableNotes, where: "'"+user+"'", orderBy: orderBy);
     final result = await db.query(tableNotes, orderBy: orderBy);
 
     return result.map((json) => Note.fromJson(json)).toList();
+
+    */ 
   }
 
   Future<int> update(Note note) async {
